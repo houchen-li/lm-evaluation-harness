@@ -7,6 +7,11 @@ from typing import List, Optional, Tuple
 import pytest
 import torch
 
+try:
+    import torch_musa
+except ModuleNotFoundError:
+    torch_musa = None
+
 from lm_eval.caching.cache import PATH
 
 

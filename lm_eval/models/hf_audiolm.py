@@ -6,6 +6,11 @@ import transformers
 from tqdm import tqdm
 from transformers import BatchEncoding
 
+try:
+    import torch_musa
+except ModuleNotFoundError:
+    torch_musa = None
+
 from lm_eval.api.instance import Instance
 from lm_eval.api.registry import register_model
 from lm_eval.models.huggingface import HFLM
@@ -268,7 +273,7 @@ class HFAUDIOLMQWEN(HFLM):
             cont = self._model_multimodal_generate(inputs, stop=until, **kwargs)
 
             del inputs
-            torch.cuda.empty_cache()
+            empty_cache()
             import gc
 
             gc.collect()

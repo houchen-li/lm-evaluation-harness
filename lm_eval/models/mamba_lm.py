@@ -2,6 +2,11 @@ from typing import Optional, Union
 
 import torch
 
+try:
+    import torch_musa
+except ModuleNotFoundError:
+    torch_musa = None
+
 import lm_eval.models.utils
 from lm_eval.api.registry import register_model
 from lm_eval.models.huggingface import HFLM

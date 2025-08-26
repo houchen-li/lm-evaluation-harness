@@ -23,6 +23,11 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
+try:
+    import torch_musa
+except ModuleNotFoundError:
+    torch_musa = None
+
 from lm_eval.api.instance import Instance
 from lm_eval.api.model import LM
 from lm_eval.api.registry import register_model

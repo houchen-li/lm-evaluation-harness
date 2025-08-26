@@ -12,6 +12,8 @@ import jinja2
 import torch
 import torch.nn.functional as F
 import transformers
+from torch.cuda import empty_cache
+from torch.cuda import device_count
 from accelerate import (
     Accelerator,
     InitProcessGroupKwargs,
@@ -26,6 +28,13 @@ from transformers.models.auto.modeling_auto import (
     MODEL_FOR_CAUSAL_LM_MAPPING_NAMES,
     MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES,
 )
+
+try:
+    import torch_musa
+    from torch_musa.core.memory import empty_cache
+    from torch_musa.core.device import device_count
+except ModuleNotFoundError:
+    torch_musa = None
 
 from lm_eval import utils
 from lm_eval.api.model import TemplateLM
@@ -124,7 +133,7 @@ class HFLM(TemplateLM):
             assert isinstance(pretrained, str)
             assert isinstance(batch_size, (int, str))
 
-            gpus = torch.cuda.device_count()
+            gpus = device_count()
             accelerator_kwargs = InitProcessGroupKwargs(timeout=timedelta(weeks=52))
             accelerator = Accelerator(kwargs_handlers=[accelerator_kwargs])
             if accelerator.num_processes > 1:
@@ -141,6 +150,7 @@ class HFLM(TemplateLM):
                     + [f"cuda:{i}" for i in range(gpus)]
                     + ["mps", "mps:0"]
                     + [f"npu:{i}" for i in range(gpus)]
+                    + [f"musa:{i}" for i in range(gpus)]
                 )
                 if device and device in device_list:
                     self._device = torch.device(device)
@@ -154,11 +164,14 @@ class HFLM(TemplateLM):
                 else:
                     eval_logger.info("Device not specified")
                     eval_logger.info(f"Cuda Available? {torch.cuda.is_available()}")
-                    self._device = (
-                        torch.device("cuda")
-                        if torch.cuda.is_available()
-                        else torch.device("cpu")
-                    )
+                    eval_logger.info(f"Musa Available? {torch_musa is not None}")
+                    self._device = None
+                    if torch.cuda.is_available():
+                        self._device = torch.device("cuda")
+                    elif torch_musa is not None:
+                        self._device = torch.device("musa")
+                    else:
+                        self._device = torch.device("cpu")
             else:  # Parallelism managed by accelerate
                 if device != "cuda":
                     eval_logger.info(
@@ -603,7 +616,7 @@ class HFLM(TemplateLM):
         model_kwargs.update(
             self._get_accelerate_args(
                 parallelize=parallelize,
-                device_map=kwargs.get("device_map"),
+                device_map="cpu",
                 max_memory_per_gpu=max_memory_per_gpu,
                 max_cpu_memory=max_cpu_memory,
                 offload_folder=offload_folder,
@@ -629,6 +642,7 @@ class HFLM(TemplateLM):
                 subfolder=subfolder,
                 **model_kwargs,
             )
+            self._model.to(self._device)
         else:
             if autogptq and gptqmodel:
                 raise ValueError(

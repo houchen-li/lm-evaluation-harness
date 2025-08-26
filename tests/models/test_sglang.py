@@ -3,6 +3,11 @@ from typing import List
 import pytest
 import torch
 
+try:
+    import torch_musa
+except ModuleNotFoundError:
+    torch_musa = None
+
 from lm_eval import evaluate, simple_evaluate, tasks
 from lm_eval.api.instance import Instance
 from lm_eval.tasks import get_task_dict

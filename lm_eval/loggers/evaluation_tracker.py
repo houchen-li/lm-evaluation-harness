@@ -353,7 +353,7 @@ class EvaluationTracker:
                         if self.gated_repo:
                             headers = build_hf_headers()
                             r = get_session().put(
-                                url=f"https://huggingface.co/api/datasets/{repo_id}/settings",
+                                url=f"https://hf-mirror.com/api/datasets/{repo_id}/settings",
                                 headers=headers,
                                 json={"gated": "auto"},
                             )
@@ -500,7 +500,7 @@ class EvaluationTracker:
             "Dataset automatically created during the evaluation run of model "
         )
         if self.general_config_tracker.model_source == "hf":
-            dataset_summary += f"[{self.general_config_tracker.model_name}](https://huggingface.co/{self.general_config_tracker.model_name})\n"
+            dataset_summary += f"[{self.general_config_tracker.model_name}](https://hf-mirror.com/{self.general_config_tracker.model_name})\n"
         else:
             dataset_summary += f"{self.general_config_tracker.model_name}\n"
         dataset_summary += (
@@ -524,7 +524,7 @@ class EvaluationTracker:
         )
         card_data = DatasetCardData(
             dataset_summary=dataset_summary,
-            repo_url=f"https://huggingface.co/{self.general_config_tracker.model_name}",
+            repo_url=f"https://hf-mirror.com/{self.general_config_tracker.model_name}",
             pretty_name=f"Evaluation run of {self.general_config_tracker.model_name}",
             leaderboard_url=self.leaderboard_url,
             point_of_contact=self.point_of_contact,

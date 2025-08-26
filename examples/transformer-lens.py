@@ -5,6 +5,11 @@ import torch.nn as nn
 from transformer_lens import HookedTransformer
 from transformers import AutoConfig
 
+try:
+    import torch_musa
+except ModuleNotFoundError:
+    torch_musa = None
+
 from lm_eval import evaluator
 from lm_eval.models.huggingface import HFLM
 

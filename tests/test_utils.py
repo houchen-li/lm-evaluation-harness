@@ -4,6 +4,11 @@ import numpy as np
 import pytest
 import torch
 
+try:
+    import torch_musa
+except ModuleNotFoundError:
+    torch_musa = None
+
 from lm_eval.api.metrics import (
     aggregate_subtask_metrics,
     mean,

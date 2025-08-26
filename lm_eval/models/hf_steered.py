@@ -8,6 +8,11 @@ from peft.peft_model import PeftModel
 from torch import Tensor, nn
 from transformers import PreTrainedModel
 
+try:
+    import torch_musa
+except ModuleNotFoundError:
+    torch_musa = None
+
 from lm_eval.api.registry import register_model
 from lm_eval.models.huggingface import HFLM
 

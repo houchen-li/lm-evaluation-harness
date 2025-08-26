@@ -10,6 +10,11 @@ from typing import TYPE_CHECKING, List, Optional, Union
 import numpy as np
 import torch
 
+try:
+    import torch_musa
+except ModuleNotFoundError:
+    torch_musa = None
+
 import lm_eval.api.metrics
 import lm_eval.api.registry
 import lm_eval.api.task

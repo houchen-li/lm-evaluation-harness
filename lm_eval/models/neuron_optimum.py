@@ -11,6 +11,11 @@ from tqdm import tqdm
 from transformers import GenerationConfig
 from transformers.generation import StoppingCriteriaList
 
+try:
+    import torch_musa
+except ModuleNotFoundError:
+    torch_musa = None
+
 import lm_eval.models.utils
 from lm_eval import utils
 from lm_eval.api.model import TemplateLM
